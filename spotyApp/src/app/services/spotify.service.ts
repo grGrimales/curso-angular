@@ -12,30 +12,43 @@ export class SpotifyService {
 
   constructor( private http: HttpClient) { 
     console.log('Spotify Service listo');
-    
-  }
 
-  getToken( tokenGenerado: string ){
-    let token = this.http.get("https://spotify-get-token-grediana.herokuapp.com/spotify/1733df18b721410eb85dadfce94e2acf/db1c7f0ced264a218759ac78667974ee")
-    .subscribe( tokens => {
-     
-    });
-
-  }
-
-  getQuery( query: string ){
-
-    const url = `https://api.spotify.com/v1/${ query }`;
    
+  }
+
+  saveToken() {
+
+
+    this.http.get("https://spotify-get-token-grediana.herokuapp.com/spotify/1733df18b721410eb85dadfce94e2acf/db1c7f0ced264a218759ac78667974ee")
+      .toPromise()
+      .then((credenciales: any) => {
+        let tokenNuevo = credenciales['access_token']
+
+        localStorage.setItem('token-spotify', JSON.stringify({ token: tokenNuevo }));
+
+      }, (err: any) => {
+        console.log(err);
+      })
+   
+
+  }
+  getQuery(query: string) {
+
+    this.saveToken();
+
+
+    const url = `https://api.spotify.com/v1/${query}`;
+
+    const credenciales =  JSON.parse( localStorage.getItem('token-spotify')|| '{}')
 
 
     const headers = new HttpHeaders({
-      'Authorization': 'Bearer BQBzdhc8E1NPikH7GfQCREnpdxwzkKELf2xIS6ZYw_SNgazOlecJYGH_u3EKHHqmxrBNrx8JBiU2qhqre5Y'
+      'Authorization': `Bearer ${credenciales['token']}`
     });
 
-    return this.http.get( url, { headers });
+    return this.http.get(url, { headers });
 
-    
+
   }
 
 
